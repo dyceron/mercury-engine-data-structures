@@ -5,6 +5,7 @@ on:
   push:
     branches:
      - main
+     - 'gh-readonly-queue/main/pr-**'
     tags:
       - '*'
 
@@ -26,7 +27,7 @@ jobs:
           submodules: 'recursive'
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
@@ -39,7 +40,7 @@ jobs:
         run: python -m build
 
       - name: Store the packages
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: python-package-distributions
           path: dist
@@ -70,18 +71,18 @@ jobs:
         shell: bash
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python.version }}
 
       - name: Download all the dists
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: python-package-distributions
           path: dist/
 
       - name: Install built wheel
-        run: python -m pip install "$(ls dist/*.whl)[test]"
+        run: python -m pip install "$(ls dist/*.whl)[test]" -c requirements.txt
         shell: bash
 
       - name: test
@@ -94,7 +95,7 @@ jobs:
 
     steps:
       - name: Download all the dists
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: python-package-distributions
           path: dist/
@@ -140,7 +141,7 @@ jobs:
         run: venv/bin/python -m pip install --upgrade pip pytest-xdist
 
       - name: install built wheel
-        run: venv/bin/python -m pip install -e ".[test]"
+        run: venv/bin/python -m pip install -e ".[test]" -c requirements.txt
 
       - name: Run Tests
         run:
