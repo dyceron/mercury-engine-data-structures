@@ -4,18 +4,22 @@ import construct
 from construct.core import (
     Const,
     Construct,
-    Hex,
+    IfThenElse,
     Int32ul,
     Struct,
 )
 
-from mercury_engine_data_structures.common_types import StrId, make_vector
-from mercury_engine_data_structures.formats import BaseResource
-from mercury_engine_data_structures.game_check import Game
+from mercury_engine_data_structures.common_types import StrId, VersionAdapter, make_vector
+from mercury_engine_data_structures.formats.base_resource import BaseResource
+from mercury_engine_data_structures.game_check import Game, current_game_at_most
 
 BLSND = Struct(
     "_magic" / Const(b"LSND"),
-    "version" / Const(0x000B0001, Hex(Int32ul)),
+    "version" / IfThenElse(
+        current_game_at_most(Game.SAMUS_RETURNS),
+        VersionAdapter("1.11.0"),
+        VersionAdapter("1.12.0")
+    ),
     "unk" / Int32ul,
     "sound_limits" / make_vector(Struct(
         "name" / StrId,

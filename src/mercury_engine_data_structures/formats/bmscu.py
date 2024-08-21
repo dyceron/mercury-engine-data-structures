@@ -1,9 +1,10 @@
 from construct import Construct
 
-from mercury_engine_data_structures.formats import BaseResource, standard_format
+from mercury_engine_data_structures.formats import standard_format
+from mercury_engine_data_structures.formats.base_resource import BaseResource
 from mercury_engine_data_structures.game_check import Game
 
-BMSCU = standard_format.create('CCutSceneDef', 0x02030008)
+BMSCU = standard_format.create('CCutSceneDef', "8.3.2")
 
 
 class Bmscu(BaseResource):

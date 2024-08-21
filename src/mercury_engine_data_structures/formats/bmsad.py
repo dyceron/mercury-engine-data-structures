@@ -12,7 +12,6 @@ from construct.core import (
     Flag,
     Float32l,
     Hex,
-    IfThenElse,
     Int8ul,
     Int16ul,
     Int32sl,
@@ -22,25 +21,24 @@ from construct.core import (
 )
 from construct.lib.containers import Container, ListContainer
 
-from mercury_engine_data_structures import common_types, game_check, type_lib
-from mercury_engine_data_structures.common_types import Char, CVector3D, Float, StrId, make_dict, make_vector
+from mercury_engine_data_structures import common_types, type_lib
+from mercury_engine_data_structures.common_types import (
+    Char,
+    CVector3D,
+    Float,
+    StrId,
+    VersionAdapter,
+    make_dict,
+    make_vector,
+)
 from mercury_engine_data_structures.construct_extensions.alignment import PrefixedAllowZeroLen
 from mercury_engine_data_structures.construct_extensions.function_complex import ComplexIf, SwitchComplexKey
 from mercury_engine_data_structures.construct_extensions.misc import ErrorWithMessage
-from mercury_engine_data_structures.formats import BaseResource, dread_types
+from mercury_engine_data_structures.formats.base_resource import BaseResource
 from mercury_engine_data_structures.formats.bmsas import BMSAS_SR, Bmsas
 from mercury_engine_data_structures.formats.property_enum import PropertyEnum
 from mercury_engine_data_structures.game_check import Game, GameSpecificStruct
 from mercury_engine_data_structures.type_lib import get_type_lib_dread, get_type_lib_for_game
-
-
-def SR_or_Dread(sr, dread):
-    return IfThenElse(
-        game_check.current_game_at_most(Game.SAMUS_RETURNS),
-        sr,
-        dread,
-    )
-
 
 # Functions
 FunctionArgument = Struct(
@@ -90,6 +88,8 @@ ExtraFields = common_types.DictAdapter(make_vector(
 
 @functools.cache
 def fieldtypes(game: Game) -> dict[str, Construct]:
+    from mercury_engine_data_structures.formats import dread_types
+
     if game == Game.DREAD:
         return {k: v for k, v in vars(dread_types).items() if isinstance(v, Construct)}
     raise ValueError(f"No field types defined for {game}")
@@ -328,7 +328,7 @@ SRHeader = Struct(
 # BMSAD
 BMSAD_SR = Struct(
     "_magic" / Const(b"MSAD"),
-    "version" / Const(0x002C0001, Hex(Int32ul)),
+    "version" / VersionAdapter("1.44.0"),
 
     "name" / StrId,
 
@@ -357,7 +357,7 @@ BMSAD_SR = Struct(
 
 BMSAD_Dread = Struct(
     "_magic" / Const(b"MSAD"),
-    "version" / Const(0x0200000F, Hex(Int32ul)),
+    "version" / VersionAdapter("15.0.2"),
 
     "name" / StrId,
     "type" / StrId,

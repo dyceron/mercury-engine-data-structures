@@ -1,14 +1,18 @@
 import copy
 import functools
+import struct
 import typing
 
 import construct
 from construct import Adapter
 
-from mercury_engine_data_structures.construct_extensions.strings import CStringRobust, PaddedStringRobust
+from mercury_engine_data_structures.construct_extensions.strings import (
+    CStringRobust,
+    StaticPaddedString,
+)
 
 StrId = CStringRobust("utf-8")
-Char = PaddedStringRobust(1, "utf-8")
+Char = StaticPaddedString(1, "utf-8")
 Int: construct.FormatField = typing.cast(construct.FormatField, construct.Int32sl)
 UInt: construct.FormatField = typing.cast(construct.FormatField, construct.Int32ul)
 Float: construct.FormatField = typing.cast(construct.FormatField, construct.Float32l)
@@ -16,6 +20,35 @@ CVector2D = construct.Array(2, Float)
 CVector3D = construct.Array(3, Float)
 CVector4D = construct.Array(4, Float)
 
+class VersionAdapter(Adapter):
+    def __init__(self, value: int | str | tuple[int, int, int] | None = None):
+        if isinstance(value, str):
+            value = tuple([int(i) for i in value.split(".")])
+        elif isinstance(value, int):
+            value = struct.pack("<I", value)
+            value  = struct.unpack("<HBB", value)
+
+        if value is None:
+            subcon = construct.Struct(major=construct.Int16ul, minor=construct.Int8ul, patch=construct.Int8ul)
+        else:
+            major, minor, patch = value
+            subcon = construct.Struct(
+                major = construct.Const(major, construct.Int16ul),
+                minor = construct.Const(minor, construct.Int8ul),
+                patch = construct.Const(patch, construct.Int8ul)
+            )
+        super().__init__(subcon)
+
+    def _decode(self, obj, context, path):
+        return f"{obj.major}.{obj.minor}.{obj.patch}"
+
+    def _encode(self, obj, context, path):
+        lst = [int(i) for i in obj.split(".")]
+        return {
+            "major": lst[0],
+            "minor": lst[1],
+            "patch": lst[2]
+        }
 
 def _cvector_emitparse(length: int, code: construct.CodeGen) -> str:
     """Specialized construct compile for CVector2/3/4D"""
@@ -127,6 +160,7 @@ class DictAdapter(Adapter):
 
         block = f"""
             def {fname}(io, this):
+                # {self.name} ({self})
                 obj = {self.subcon._compileparse(code)}
                 result = Container()
                 for item in obj:

@@ -5,19 +5,16 @@ from construct.core import (
     Construct,
     Container,
     Flag,
-    Hex,
     Int32sl,
     Int32ul,
-    Int64ul,
     LazyBound,
     PrefixedArray,
-    Select,
     Struct,
     Switch,
 )
 
-from mercury_engine_data_structures.common_types import Float, StrId
-from mercury_engine_data_structures.formats import BaseResource
+from mercury_engine_data_structures.common_types import Float, StrId, VersionAdapter
+from mercury_engine_data_structures.formats.base_resource import BaseResource
 from mercury_engine_data_structures.formats.property_enum import PropertyEnum
 from mercury_engine_data_structures.game_check import Game
 
@@ -51,14 +48,14 @@ CrcKeyArgument = Struct(
 )
 
 Behavior = Struct(
-    type = Select(PropertyEnum, Hex(Int64ul)),
+    type = PropertyEnum,
     args = PrefixedArray(Int32ul, CrcKeyArgument),
     children = PrefixedArray(Int32ul, LazyBound(lambda: Behavior)),
 )
 
 BMTRE = Struct(
     _magic = Const(b"BTRE"),
-    version = Const(0x00050001, Hex(Int32ul)), # for dread, unsure if it exists in SR
+    version = VersionAdapter("1.5.0"),
     args = PrefixedArray(Int32ul, StrKeyArgument),
     behavior = Behavior,
 )
