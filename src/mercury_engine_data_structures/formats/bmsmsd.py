@@ -1,13 +1,19 @@
+from __future__ import annotations
+
 import functools
+from typing import TYPE_CHECKING
 
 import construct
 from construct.core import Const, Construct, Enum, FlagsEnum, Float32l, Int32sl, Int32ul, Struct
 
+from mercury_engine_data_structures.base_resource import BaseResource
 from mercury_engine_data_structures.common_types import CVector2D, CVector3D, StrId, VersionAdapter, make_vector
-from mercury_engine_data_structures.formats.base_resource import BaseResource
-from mercury_engine_data_structures.game_check import Game
 
-TileBorders = FlagsEnum(Int32sl,
+if TYPE_CHECKING:
+    from mercury_engine_data_structures.game_check import Game
+
+TileBorders = FlagsEnum(
+    Int32sl,
     TOP=1,
     BOTTOM=2,
     LEFT=4,
@@ -24,7 +30,7 @@ TileType = Enum(
     HEAT=2,
     ACID=4,
     ACID_RISE=8,
-    ACID_FALL=12
+    ACID_FALL=12,
 )
 
 IconPriority = Enum(
@@ -35,7 +41,7 @@ IconPriority = Enum(
     ENERGY_CLOUD=2,
     DOOR=3,
     CHOZO_SEAL=4,
-    HIDDEN_ITEM=5
+    HIDDEN_ITEM=5,
 )
 
 # BMSMSD
@@ -71,7 +77,7 @@ BMSMSD = Struct(
         )
     ),
     construct.Terminated,
-)
+)  # fmt: skip
 
 
 class Bmsmsd(BaseResource):

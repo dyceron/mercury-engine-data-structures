@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import construct
 from construct import (
     Const,
@@ -8,9 +10,9 @@ from construct import (
     Struct,
 )
 
+from mercury_engine_data_structures.base_resource import BaseResource
 from mercury_engine_data_structures.common_types import StrId, VersionAdapter, make_vector
 from mercury_engine_data_structures.formats import standard_format
-from mercury_engine_data_structures.formats.base_resource import BaseResource
 from mercury_engine_data_structures.game_check import Game
 
 EnemyStruct = Struct(
@@ -63,30 +65,33 @@ EnemyStruct = Struct(
             )),
         )),
     ))
-)
+)  # fmt: skip
 
 BMDEFS = Struct(
     _magic=Const(b"MDEF"),
     version=VersionAdapter("1.5.0"),
     unk1=Int32ul,
-    sounds=make_vector(Struct(
-        "sound_name" / StrId,
-        "unk1" / Int32ul,
-        "priority" / Int32ul,
-        "file_path" / StrId,
-        "unk2" / Int32ul,
-        "unk3" / Int32ul,
-        "unk4" / Int32ul,
-        "fade_in" / Float32l,
-        "fade_out" / Float32l,
-        "volume" / Float32l,
-        "unk_bool" / Flag,
-        "environment_sfx_volume" / Float32l
-    )),
+    sounds=make_vector(
+        Struct(
+            "sound_name" / StrId,
+            "unk1" / Int32ul,
+            "priority" / Int32ul,
+            "file_path" / StrId,
+            "unk2" / Int32ul,
+            "unk3" / Int32ul,
+            "unk4" / Int32ul,
+            "fade_in" / Float32l,
+            "fade_out" / Float32l,
+            "volume" / Float32l,
+            "unk_bool" / Flag,
+            "environment_sfx_volume" / Float32l,
+        )
+    ),  # fmt: skip
     unk2=Int32ul,
     enemies_list=make_vector(EnemyStruct),
     rest=construct.GreedyBytes,
 )
+
 
 class Bmdefs(BaseResource):
     @classmethod

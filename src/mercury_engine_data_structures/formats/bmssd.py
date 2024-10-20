@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import construct
 from construct import (
     Byte,
@@ -10,9 +12,9 @@ from construct import (
 )
 
 from mercury_engine_data_structures import game_check
+from mercury_engine_data_structures.base_resource import BaseResource
 from mercury_engine_data_structures.common_types import CVector3D, StrId, VersionAdapter, make_vector
 from mercury_engine_data_structures.construct_extensions.strings import StaticPaddedString
-from mercury_engine_data_structures.formats.base_resource import BaseResource
 from mercury_engine_data_structures.game_check import Game
 
 BMSSD = Struct(
@@ -55,7 +57,7 @@ BMSSD = Struct(
                     float2=CVector3D,
                     float3=CVector3D,
                 )
-            )
+            ),
         )
     ),
     strings_a=make_vector(StrId),
@@ -97,7 +99,7 @@ BMSSD = Struct(
                 int16=Int32ul,
                 float17=CVector3D,
             )
-        )
+        ),
     ),
     strings_b=make_vector(
         StrId,
@@ -115,9 +117,9 @@ BMSSD = Struct(
                             Struct(
                                 model_id=Int32ul,
                             )
-                        )
+                        ),
                     )
-                )
+                ),
             )
         ),
         make_vector(
@@ -129,12 +131,13 @@ BMSSD = Struct(
                         int1=Int32ul,
                         long3=make_vector(Int64ul),
                     )
-                )
+                ),
             )
-        )
+        ),
     ),
     rest=construct.GreedyBytes,
 ).compile()
+
 
 class Bmssd(BaseResource):
     @classmethod
